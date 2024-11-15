@@ -6,11 +6,11 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Analysis of NYC domestic flights in 2023"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Gaurav Pendharkar (gsp2136)
+    - Jason Misquitta (jm5906)
+  repo-url: https://github.com/Gaurav0502/us-domestic-flights.git
   date: today
   page-footer:
     right: |
@@ -25,7 +25,7 @@ book:
 
 format:
   html:
-    theme: cosmo
+    theme: pulse
     code-fold: true
 
 
