@@ -6,4 +6,4 @@
 .Ruserdata
 
 /.quarto/
-/data
+/data/**/*.csv

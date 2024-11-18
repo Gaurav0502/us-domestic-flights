@@ -184,12 +184,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a></li>
-  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">2.2</span> Data preparation</a>
+  <li><a href="#data-collection" id="toc-data-collection" class="nav-link" data-scroll-target="#data-collection"><span class="header-section-number">2.2</span> Data collection</a>
   <ul class="collapse">
-  <li><a href="#data-collection" id="toc-data-collection" class="nav-link" data-scroll-target="#data-collection"><span class="header-section-number">2.2.1</span> Data collection</a></li>
-  <li><a href="#data-consolidation" id="toc-data-consolidation" class="nav-link" data-scroll-target="#data-consolidation"><span class="header-section-number">2.2.2</span> Data consolidation</a></li>
+  <li><a href="#outbound-flights" id="toc-outbound-flights" class="nav-link" data-scroll-target="#outbound-flights"><span class="header-section-number">2.2.1</span> Outbound flights</a></li>
+  <li><a href="#inbound-flights" id="toc-inbound-flights" class="nav-link" data-scroll-target="#inbound-flights"><span class="header-section-number">2.2.2</span> Inbound flights</a></li>
   </ul></li>
-  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.3</span> Missing value analysis</a></li>
+  <li><a href="#data-consolidation" id="toc-data-consolidation" class="nav-link" data-scroll-target="#data-consolidation"><span class="header-section-number">2.3</span> Data consolidation</a>
+  <ul class="collapse">
+  <li><a href="#flights-data" id="toc-flights-data" class="nav-link" data-scroll-target="#flights-data"><span class="header-section-number">2.3.1</span> Flights data</a></li>
+  <li><a href="#weather" id="toc-weather" class="nav-link" data-scroll-target="#weather"><span class="header-section-number">2.3.2</span> Weather</a></li>
+  <li><a href="#planes" id="toc-planes" class="nav-link" data-scroll-target="#planes"><span class="header-section-number">2.3.3</span> Planes</a></li>
+  </ul></li>
+  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.4</span> Missing value analysis</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/edit/main/data.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -239,12 +245,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>The next section describes the data preparation process.</p>
-</section>
-<section id="data-preparation" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="data-preparation"><span class="header-section-number">2.2</span> Data preparation</h2>
 <p>The data used is not readily available online as CSV files. Hence, the data needs to be collected, filtered, consolidated, and saved for future use.</p>
-<section id="data-collection" class="level3" data-number="2.2.1">
-<h3 data-number="2.2.1" class="anchored" data-anchor-id="data-collection"><span class="header-section-number">2.2.1</span> Data collection</h3>
+</section>
+<section id="data-collection" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="data-collection"><span class="header-section-number">2.2</span> Data collection</h2>
 <p>The data collection includes two key steps:</p>
 <ul>
 <li><p>Collection of data for out-bound flights from airports that serve NYC region.</p></li>
@@ -257,171 +261,162 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(anyflights)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
 </div>
 <p>The <code>anyflights</code> package has an <code>anyflights()</code> which queries the FAA database. It fetches all the five aforementioned data frames and therefore it can take a lot of time to obtain the data based on the network connectivity. In order to avoid changes of an API timeout, the default value of 60 seconds is updated with a high value of 1500 seconds stored in the <code>API_REQ_TIMEOUT</code>. All the previously stated constraints are stored in the <code>STATIONS</code> and <code>YEAR</code> constants. <code>save_data()</code> is a utility function to save the collected data into the required directory location.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># constants</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>API_REQ_TIMEOUT <span class="ot">=</span> <span class="dv">1500</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>STATIONS <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"LGA"</span>, <span class="st">"JFK"</span>, <span class="st">"EWR"</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>YEAR <span class="ot">=</span> <span class="dv">2023</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="ot">=</span> <span class="st">"data"</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Utility function</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>save_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data, flight_type){</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  tables <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"flights"</span>, <span class="st">"planes"</span>, <span class="st">"airlines"</span>, <span class="st">"airports"</span>, <span class="st">"weather"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  csv_path <span class="ot">&lt;-</span> <span class="st">""</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(table_name <span class="cf">in</span> tables){</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">any</span>(table_name <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"airlines"</span>, <span class="st">"airports"</span>))){</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>      csv_path <span class="ot">=</span> <span class="fu">file.path</span>(DATA_DIR, <span class="st">"raw"</span>, flight_type, </span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">paste</span>(table_name, <span class="st">"csv"</span>,</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">sep =</span> <span class="st">"."</span>))</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      csv_path <span class="ot">=</span> <span class="fu">file.path</span>(DATA_DIR, <span class="st">"raw"</span>, </span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">paste</span>(table_name, <span class="st">"csv"</span>,</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">sep =</span> <span class="st">"."</span>))</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(csv_path)){</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">write.csv</span>(<span class="at">x =</span> data[table_name],</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>              <span class="at">file =</span> csv_path)</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"Saved"</span>, <span class="fu">paste</span>(table_name, <span class="st">"csv"</span>,</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>                         <span class="at">sep =</span> <span class="st">"."</span>), <span class="st">"at"</span>,</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>          csv_path, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>       </span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># constants</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>API_REQ_TIMEOUT <span class="ot">=</span> <span class="dv">1500</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>STATIONS <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"LGA"</span>, <span class="st">"JFK"</span>, <span class="st">"EWR"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>YEAR <span class="ot">=</span> <span class="dv">2023</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="ot">=</span> <span class="st">"data"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Utility function</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>save_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data, flight_type){</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  tables <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"flights"</span>, <span class="st">"planes"</span>, <span class="st">"airlines"</span>, <span class="st">"airports"</span>, <span class="st">"weather"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  csv_path <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(table_name <span class="cf">in</span> tables){</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>     </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">any</span>(table_name <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"airlines"</span>, <span class="st">"airports"</span>))){</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      csv_path <span class="ot">=</span> <span class="fu">file.path</span>(DATA_DIR, <span class="st">"raw"</span>, flight_type, </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">paste</span>(table_name, <span class="st">"csv"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">sep =</span> <span class="st">"."</span>))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    }<span class="cf">else</span>{</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      csv_path <span class="ot">=</span> <span class="fu">file.path</span>(DATA_DIR, <span class="st">"raw"</span>, </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">paste</span>(table_name, <span class="st">"csv"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">sep =</span> <span class="st">"."</span>))</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(csv_path)){</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">write.csv</span>(<span class="at">x =</span> data[table_name],</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>              <span class="at">file =</span> csv_path)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">"Saved"</span>, <span class="fu">paste</span>(table_name, <span class="st">"csv"</span>,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>                         <span class="at">sep =</span> <span class="st">"."</span>), <span class="st">"at"</span>,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>          csv_path, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>       </span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="outbound-flights" class="level4" data-number="2.2.1.1">
-<h4 data-number="2.2.1.1" class="anchored" data-anchor-id="outbound-flights"><span class="header-section-number">2.2.1.1</span> Outbound flights</h4>
+<section id="outbound-flights" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="outbound-flights"><span class="header-section-number">2.2.1</span> Outbound flights</h3>
 <p>For this use-case, an outbound flight is one that departs from one of airports that serve the NYC region and arrives at any other airport within the United States. Therefore, the departure airports denoted by the <code>station</code> argument is given the NYC airports and the <code>year</code> as 2023.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># options(timeout = API_REQ_TIMEOUT)</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># nycflights23outbound &lt;- anyflights::anyflights(station = STATIONS,</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                year = YEAR)</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># save_data(data = nycflights23outbound,</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#           flight_type = "outbound")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">timeout =</span> API_REQ_TIMEOUT)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>nycflights23outbound <span class="ot">&lt;-</span> anyflights<span class="sc">::</span><span class="fu">anyflights</span>(<span class="at">station =</span> STATIONS,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">year =</span> YEAR)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save_data</span>(<span class="at">data =</span> nycflights23outbound,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">flight_type =</span> <span class="st">"outbound"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
-<section id="inbound-flights" class="level4" data-number="2.2.1.2">
-<h4 data-number="2.2.1.2" class="anchored" data-anchor-id="inbound-flights"><span class="header-section-number">2.2.1.2</span> Inbound flights</h4>
+<section id="inbound-flights" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="inbound-flights"><span class="header-section-number">2.2.2</span> Inbound flights</h3>
 <p>For this use-case, an inbound flight is one that departs from any other airport within the United States (except the airports that serve the NYC region) and arrives at one of airports that serve the NYC region.</p>
 <p>The departure airports are computed based on the distinct destination airports in <code>flights</code> data frame of <code>nycflights23outbound</code> . It happens to be that there are some airports for which the data cannot be fetched. Hence, the destination airports are filtered based on whether their FAA code appears in the <code>faa</code> column of <code>airports</code> data frame.</p>
 <p>All the outbound flights are obtained for the computed list of airports. However, the <code>flights</code> data frame of <code>nycflights23inbound</code> consists of flights that depart and arrive at any airport within the United States. Therefore, all flights that do not arrive in the airports that serve NYC are filtered out based on the <code>dest</code> column of <code>flights</code> data frame.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># all_airports &lt;- nycflights23outbound$airports$faa</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># dest_airports &lt;- nycflights23outbound$flights |&gt; </span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                     filter(dest %in% all_airports &amp; !dest %in% STATIONS) |&gt;</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#                        select("dest") |&gt;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                           unique()</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># dest_airports &lt;- dest_airports$dest</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># nycflights23inbound &lt;- anyflights::anyflights(station = dest_airports,</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#                                               year = YEAR)</span></span>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>all_airports <span class="ot">&lt;-</span> nycflights23outbound<span class="sc">$</span>airports<span class="sc">$</span>faa</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dest_airports <span class="ot">&lt;-</span> nycflights23outbound<span class="sc">$</span>flights <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">filter</span>(dest <span class="sc">%in%</span> all_airports <span class="sc">&amp;</span> <span class="sc">!</span>dest <span class="sc">%in%</span> STATIONS) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">select</span>(<span class="st">"dest"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">unique</span>()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>dest_airports <span class="ot">&lt;-</span> dest_airports<span class="sc">$</span>dest</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>nycflights23inbound <span class="ot">&lt;-</span> anyflights<span class="sc">::</span><span class="fu">anyflights</span>(<span class="at">station =</span> dest_airports,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">year =</span> YEAR)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>nycflights23inbound<span class="sc">$</span>flights <span class="ot">&lt;-</span> nycflights23inbound<span class="sc">$</span>flights <span class="sc">|&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                                   <span class="fu">filter</span>(dest <span class="sc">%in%</span> STATIONS)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">save_data</span>(<span class="at">data =</span> nycflights23inbound,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>          <span class="at">flight_type =</span> <span class="st">"inbound"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="data-consolidation" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="data-consolidation"><span class="header-section-number">2.3</span> Data consolidation</h2>
+<p>In the previous section, the data is collected into two different list: <code>nycflights23inbound</code> and <code>nycflights23outbound</code> . Each of these lists contain five data frames: <code>flights</code>, <code>weather</code>, <code>planes</code>, <code>airports</code>, and <code>airlines</code>. The <code>airports</code> and <code>airlines</code> data frames remain the same for inbound and outbound flights. The data for the <code>flights</code>, <code>weather</code>, and <code>planes</code> must be combined respectively.</p>
+<section id="flights-data" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="flights-data"><span class="header-section-number">2.3.1</span> Flights data</h3>
+<p>All the rows in the inbound and outbound <code>flights</code> data frames are combined into a single data frame using <code>rbind()</code> powered by the <code>dplyr</code> package. The combined <code>flights</code> data is sorted based on the primary key of the <code>flights</code> table.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nycflights23 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(nycflights23inbound<span class="sc">$</span>flights,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                      nycflights23outbound<span class="sc">$</span>flights)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>nycflights23 <span class="ot">&lt;-</span> nycflights23 <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">arrange</span>(year, month, day, hour, flight)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> nycflights23,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">file =</span> <span class="st">"data/raw/flights.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="weather" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="weather"><span class="header-section-number">2.3.2</span> Weather</h3>
+<p>The <code>weather</code> data frame consists of the hourly weather parameters of the airport. The inbound and outbound <code>weather</code> data frames contain data for different set of airports. Therefore, both of them need to be joined in a similar way as that of <code>flights</code> data.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>weather <span class="ot">&lt;-</span> <span class="fu">rbind</span>(nycflights23inbound<span class="sc">$</span>weather,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                 nycflights23outbound<span class="sc">$</span>weather)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>weather <span class="ot">&lt;-</span> weather <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>             <span class="fu">arrange</span>(origin, year, month, day, hour)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> weather,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">file =</span> <span class="st">"data/raw/weather.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="planes" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="planes"><span class="header-section-number">2.3.3</span> Planes</h3>
+<p>The <code>planes</code> data frame stored the production details for each aircraft based on its <code>tailnum</code>. Generally, the plane that operates the inbound flight also operates the outbound flight. However, since the NYC airports are hubs for a majority of US carriers, there is a possibility that an aircraft is changed for the onward flight.</p>
+<p>Therefore, all the <code>planes</code> operating the inbound flights is considered and all planes for outbound flights that are not in set of <code>planes</code> that operated in the inbound flights are considered. At the end, the data is consolidate to get production details of all the aircraft operating on the routes in the <code>flights</code> data frame.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tailnum <span class="ot">&lt;-</span> <span class="fu">unique</span>(nycflights23<span class="sc">$</span>tailnum)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>planes_inbound <span class="ot">&lt;-</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  planes_inbound <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(planes_inbound<span class="sc">$</span>planes.tailnum <span class="sc">%in%</span> tailnum)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>planes_outbound <span class="ot">&lt;-</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>   planes_outbound <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>     <span class="fu">filter</span>(<span class="sc">!</span>planes_outbound<span class="sc">$</span>planes.tailnum <span class="sc">%in%</span> planes_inbound<span class="sc">$</span>planes.tailnum)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>planes <span class="ot">&lt;-</span> <span class="fu">rbind</span>(planes_inbound, planes_outbound)</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># nycflights23inbound$flights &lt;- nycflights23inbound$flights |&gt;</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#                                   filter(dest %in% STATIONS)</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># save_data(data = nycflights23inbound,</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#           flight_type = "inbound")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="at">x =</span> planes,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>          <span class="at">file =</span> <span class="st">"data/raw/planes.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>Finally, all the data is stored in <code>/data</code> directory under the <code>/raw</code> sub-directory since no data cleaning has been performed on it yet. The <code>/raw</code> sub-directory contains the <code>.csv</code> files for consolidated data and has two further sub-directories <code>/inbound</code> and <code>/outbound</code> with the respective <code>.csv</code> files.</p>
 </section>
 </section>
-<section id="data-consolidation" class="level3" data-number="2.2.2">
-<h3 data-number="2.2.2" class="anchored" data-anchor-id="data-consolidation"><span class="header-section-number">2.2.2</span> Data consolidation</h3>
-<section id="flights-data" class="level4" data-number="2.2.2.1">
-<h4 data-number="2.2.2.1" class="anchored" data-anchor-id="flights-data"><span class="header-section-number">2.2.2.1</span> Flights data</h4>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># nycflights23 &lt;- rbind(nycflights23inbound$flights, </span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#                       nycflights23outbound$flights)</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># nycflights23 &lt;- nycflights23 |&gt;</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#                   arrange(year, month, day, hour, flight)</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># write.csv(x = nycflights23,</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#           file = "data/raw/flights.csv")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
-<section id="weather" class="level4" data-number="2.2.2.2">
-<h4 data-number="2.2.2.2" class="anchored" data-anchor-id="weather"><span class="header-section-number">2.2.2.2</span> Weather</h4>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># weather &lt;- rbind(nycflights23inbound$weather, </span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#                  nycflights23outbound$weather)</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># weather &lt;- weather |&gt;</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#              arrange(origin, year, month, day, hour)</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># write.csv(x = weather,</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#           file = "data/raw/weather.csv")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
-<section id="planes" class="level4" data-number="2.2.2.3">
-<h4 data-number="2.2.2.3" class="anchored" data-anchor-id="planes"><span class="header-section-number">2.2.2.3</span> Planes</h4>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tailnum &lt;- unique(nycflights23$tailnum)</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># planes_inbound &lt;- </span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   planes_inbound |&gt; </span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     filter(planes_inbound$planes.tailnum %in% tailnum)</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># planes_outbound &lt;- </span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    planes_outbound |&gt;</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#      filter(!planes_outbound$planes.tailnum %in% planes_inbound$planes.tailnum)</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># planes &lt;- rbind(planes_inbound, planes_outbound)</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># write.csv(x = planes,</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#           file = "data/raw/planes.csv")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
-</section>
-</section>
-<section id="missing-value-analysis" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.3</span> Missing value analysis</h2>
+<section id="missing-value-analysis" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.4</span> Missing value analysis</h2>
 
 
 </section>
