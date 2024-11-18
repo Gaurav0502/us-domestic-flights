@@ -1,8 +1,20 @@
+---
+execute:
+  eval: false
+---
+
+```{css}
+#| echo: false
+p {
+  text-align: justify
+}
+```
+
 # Data
 
 ## Description
 
-The data used throughout this project deals with on-time performance of domestic flights within the United States. In the recent years, the air traffic has increased significantly and huge amounts of flight data is generated each day. Hence, the data is filtered based on the following criteria:
+The data used throughout this project deals with on-time performance of domestic flights within the United States. In the recent years, the air traffic has increased significantly and huge amounts of flight data is being generated each day. Hence, the data is filtered based on the following criteria:
 
 -   The airports of interest are those serving the New York City (NYC) region (i.e. LGA, JFK, and EWR).
 
@@ -10,7 +22,7 @@ The data used throughout this project deals with on-time performance of domestic
 
 -   the data is restricted to the most recent year (i.e. 2023).
 
-The data is obtained using the `anyflights` package from [CRAN](https://cran.r-project.org/web/packages/anyflights/anyflights.pdf "anyflights package"). This package queries the data released annually by the Federal Aviation Administration (FAA) in first quarter of the following year. The FAA database is updated every year and consequently the data can be queried from any historical data up to the most recent year. The data is obtained as five different data frames as follows:
+The data is obtained using the `anyflights` package from [CRAN](https://cran.r-project.org/web/packages/anyflights/anyflights.pdf "anyflights package"). This package queries the data released annually by the Federal Aviation Administration (FAA). The data for a particular year is released in the first quarter of the following year. The FAA database is updated every year and consequently the data can be queried from any historical data up to the most recent year. The data is obtained as five different data frames as follows:
 
 -   `flights`: it provides all the daily flight on-time performance data. It includes the origin airport, scheduled departure time, destination airport, scheduled arrival time, carrier, tail number of the aircraft, arrival delay, and departure delay. It has 863228 rows and 19 columns.
 
@@ -22,17 +34,15 @@ The data is obtained using the `anyflights` package from [CRAN](https://cran.r-p
 
 -   `airlines`: it provides the metadata for the airlines which is the IATA code of the carrier and its name. It has 14 rows and 2 columns.
 
-All the data frames are related to each other. Hence, the data has a relation structure. Every row in each of the data frames can be identified by a primary key (PK) and the `flights` data frame can related to each of the other four data frames with the help of foreign keys (FK). Figure 1 shows the relational schema of the data. For example, every entry in the `flights` data frame can be uniquely identified by (`year`, `month`, `day`, `hour`, and `flight`) and it can be joined with the `weather` data frame based on (`origin`, `year`, `month`, `day`, and `hour`)
+All the data frames are related to each other. Hence, the data has a relational structure. Every row in each of the data frames can be identified by a primary key (PK) and the `flights` data frame can related to each of the other four data frames with the help of foreign keys (FK). Figure 1 shows the relational schema of the data. For example, every entry in the `flights` data frame can be uniquely identified by (`year`, `month`, `day`, `hour`, and `flight`) and it can be joined with the `weather` data frame based on (`origin`, `year`, `month`, `day`, and `hour`)
 
 ![Fig. 1: The relational schema for the data obtained using the anyflights package in R where PK = Primary Key, FK = Foreign Key, ... = more columns exist.](data-schema.png)
 
-The next section describes the data preparation process.
-
-## Data preparation
-
 The data used is not readily available online as CSV files. Hence, the data needs to be collected, filtered, consolidated, and saved for future use.
 
-### Data collection
+The next section describes the data preparation process.
+
+## Data collection
 
 The data collection includes two key steps:
 
@@ -49,7 +59,7 @@ library(dplyr)
 
 ```
 
-The `anyflights` package has an `anyflights()` which queries the FAA database. It fetches all the five aforementioned data frames and therefore it can take a lot of time to obtain the data based on the network connectivity. In order to avoid changes of an API timeout, the default value of 60 seconds is updated with a high value of 1500 seconds stored in the `API_REQ_TIMEOUT`. All the previously stated constraints are stored in the `STATIONS` and `YEAR` constants. `save_data()` is a utility function to save the collected data into the required directory location.
+The `anyflights` package has a `anyflights()` function which queries the FAA database. It fetches all the five aforementioned data frames and therefore it can take a lot of time to obtain the data contingent upon the network connectivity. In order to avoid chances of an API timeout, the default value of 60 seconds is updated with a high value of 1500 seconds stored in the `API_REQ_TIMEOUT`. All the previously stated constraints are stored in the `STATIONS` and `YEAR` constants. `save_data()` is a utility function to save the collected data into the required directory location.
 
 ```{r}
 
@@ -94,23 +104,23 @@ save_data <- function(data, flight_type){
 }
 ```
 
-#### Outbound flights
+### Outbound flights
 
 For this use-case, an outbound flight is one that departs from one of airports that serve the NYC region and arrives at any other airport within the United States. Therefore, the departure airports denoted by the `station` argument is given the NYC airports and the `year` as 2023.
 
 ```{r}
 
-# options(timeout = API_REQ_TIMEOUT)
-# 
-# nycflights23outbound <- anyflights::anyflights(station = STATIONS,
-#                                                year = YEAR)
-# 
-# save_data(data = nycflights23outbound,
-#           flight_type = "outbound")
+options(timeout = API_REQ_TIMEOUT)
+
+nycflights23outbound <- anyflights::anyflights(station = STATIONS,
+                                               year = YEAR)
+
+save_data(data = nycflights23outbound,
+          flight_type = "outbound")
 
 ```
 
-#### Inbound flights
+### Inbound flights
 
 For this use-case, an inbound flight is one that departs from any other airport within the United States (except the airports that serve the NYC region) and arrives at one of airports that serve the NYC region.
 
@@ -120,76 +130,88 @@ All the outbound flights are obtained for the computed list of airports. However
 
 ```{r}
 
-# all_airports <- nycflights23outbound$airports$faa
-# 
-# dest_airports <- nycflights23outbound$flights |> 
-#                     filter(dest %in% all_airports & !dest %in% STATIONS) |>
-#                        select("dest") |>
-#                           unique()
-# 
-# dest_airports <- dest_airports$dest
+all_airports <- nycflights23outbound$airports$faa
 
-# nycflights23inbound <- anyflights::anyflights(station = dest_airports,
-#                                               year = YEAR)
+dest_airports <- nycflights23outbound$flights |>
+                     filter(dest %in% all_airports & !dest %in% STATIONS) |>
+                        select("dest") |>
+                           unique()
 
-# nycflights23inbound$flights <- nycflights23inbound$flights |>
-#                                   filter(dest %in% STATIONS)
-# 
-# save_data(data = nycflights23inbound,
-#           flight_type = "inbound")
+dest_airports <- dest_airports$dest
+
+nycflights23inbound <- anyflights::anyflights(station = dest_airports,
+                                               year = YEAR)
+
+nycflights23inbound$flights <- nycflights23inbound$flights |>
+                                   filter(dest %in% STATIONS)
+
+save_data(data = nycflights23inbound,
+          flight_type = "inbound")
 
 ```
 
-### Data consolidation
+## Data consolidation
 
-#### Flights data
+In the previous section, the data is collected into two different list: `nycflights23inbound` and `nycflights23outbound` . Each of these lists contain five data frames: `flights`, `weather`, `planes`, `airports`, and `airlines`. The `airports` and `airlines` data frames remain the same for inbound and outbound flights. The data for the `flights`, `weather`, and `planes` must be combined respectively.
+
+### Flights data
+
+All the rows in the inbound and outbound `flights` data frames are combined into a single data frame using `rbind()` powered by the `dplyr` package. The combined `flights` data is sorted based on the primary key of the `flights` table.
 
 ```{r}
 
-# nycflights23 <- rbind(nycflights23inbound$flights, 
-#                       nycflights23outbound$flights)
-# 
-# nycflights23 <- nycflights23 |>
-#                   arrange(year, month, day, hour, flight)
-# 
-# write.csv(x = nycflights23,
-#           file = "data/raw/flights.csv")
+nycflights23 <- rbind(nycflights23inbound$flights,
+                      nycflights23outbound$flights)
+
+nycflights23 <- nycflights23 |>
+                  arrange(year, month, day, hour, flight)
+
+write.csv(x = nycflights23,
+          file = "data/raw/flights.csv")
 
 ```
 
-#### Weather
+### Weather
+
+The `weather` data frame consists of the hourly weather parameters of the airport. The inbound and outbound `weather` data frames contain data for different set of airports. Therefore, both of them need to be joined in a similar way as that of `flights` data.
 
 ```{r}
 
-# weather <- rbind(nycflights23inbound$weather, 
-#                  nycflights23outbound$weather)
-# 
-# weather <- weather |>
-#              arrange(origin, year, month, day, hour)
-# 
-# write.csv(x = weather,
-#           file = "data/raw/weather.csv")
+weather <- rbind(nycflights23inbound$weather,
+                 nycflights23outbound$weather)
+
+weather <- weather |>
+             arrange(origin, year, month, day, hour)
+
+write.csv(x = weather,
+          file = "data/raw/weather.csv")
 
 ```
 
-#### Planes
+### Planes
+
+The `planes` data frame stored the production details for each aircraft based on its `tailnum`. Generally, the plane that operates the inbound flight also operates the outbound flight. However, since the NYC airports are hubs for a majority of US carriers, there is a possibility that an aircraft is changed for the onward flight.
+
+Therefore, all the `planes` operating the inbound flights is considered and all planes for outbound flights that are not in set of `planes` that operated in the inbound flights are considered. At the end, the data is consolidate to get production details of all the aircraft operating on the routes in the `flights` data frame.
 
 ```{r}
 
-# tailnum <- unique(nycflights23$tailnum)
-# 
-# planes_inbound <- 
-#   planes_inbound |> 
-#     filter(planes_inbound$planes.tailnum %in% tailnum)
-# 
-# planes_outbound <- 
-#    planes_outbound |>
-#      filter(!planes_outbound$planes.tailnum %in% planes_inbound$planes.tailnum)
-# 
-# planes <- rbind(planes_inbound, planes_outbound)
-# 
-# write.csv(x = planes,
-#           file = "data/raw/planes.csv")
+tailnum <- unique(nycflights23$tailnum)
+
+planes_inbound <-
+  planes_inbound |>
+    filter(planes_inbound$planes.tailnum %in% tailnum)
+
+planes_outbound <-
+   planes_outbound |>
+     filter(!planes_outbound$planes.tailnum %in% planes_inbound$planes.tailnum)
+
+planes <- rbind(planes_inbound, planes_outbound)
+
+write.csv(x = planes,
+          file = "data/raw/planes.csv")
 ```
+
+Finally, all the data is stored in `/data` directory under the `/raw` sub-directory since no data cleaning has been performed on it yet. The `/raw` sub-directory contains the `.csv` files for consolidated data and has two further sub-directories `/inbound` and `/outbound` with the respective `.csv` files.
 
 ## Missing value analysis
