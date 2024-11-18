@@ -18,6 +18,8 @@ The `anyflights()` from the `anyflights` package is used to obtain data of the d
   
 - the flights that were scheduled for throughout 2023.
 
+The steps to download the data are explained in [data/README.md](https://github.com/Gaurav0502/us-domestic-flights/tree/main/data).
+
 ## Important Links
 
 Rendered Quarto book: https://gaurav0502.github.io/us-domestic-flights/

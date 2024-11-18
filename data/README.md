@@ -37,3 +37,7 @@ The directory structure for the `data` sub-directory must be as follows:
 ```
 
 This is required for the code in this repository to work correctly.
+
+# Code logic
+
+To understand the logic behind the code in *.R scripts, kindly refer to the data.qmd file.
