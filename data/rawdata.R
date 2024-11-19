@@ -45,8 +45,7 @@ save_data <- function(data, flight_type){
 }
 
 nycflights23outbound <- anyflights::anyflights(station = STATIONS,
-                                               year = YEAR,
-                                               month = 1)
+                                               year = YEAR)
 
 save_data(data = nycflights23outbound,
           flight_type = "outbound")

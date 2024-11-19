@@ -223,13 +223,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="description"><span class="header-section-number">2.1</span> Description</h2>
-<p>The data used throughout this project deals with on-time performance of domestic flights within the United States. In the recent years, the air traffic has increased significantly and huge amounts of flight data is generated each day. Hence, the data is filtered based on the following criteria:</p>
+<p>The data used throughout this project deals with on-time performance of domestic flights within the United States. In the recent years, the air traffic has increased significantly and huge amounts of flight data is being generated each day. Hence, the data is filtered based on the following criteria:</p>
 <ul>
 <li><p>The airports of interest are those serving the New York City (NYC) region (i.e.&nbsp;LGA, JFK, and EWR).</p></li>
 <li><p>Both in-bound and out-bound domestic flights.</p></li>
 <li><p>the data is restricted to the most recent year (i.e.&nbsp;2023).</p></li>
 </ul>
-<p>The data is obtained using the <code>anyflights</code> package from <a href="https://cran.r-project.org/web/packages/anyflights/anyflights.pdf" title="anyflights package">CRAN</a>. This package queries the data released annually by the Federal Aviation Administration (FAA) in first quarter of the following year. The FAA database is updated every year and consequently the data can be queried from any historical data up to the most recent year. The data is obtained as five different data frames as follows:</p>
+<p>The data is obtained using the <code>anyflights</code> package from <a href="https://cran.r-project.org/web/packages/anyflights/anyflights.pdf" title="anyflights package">CRAN</a>. This package queries the data released annually by the Federal Aviation Administration (FAA). The data for a particular year is released in the first quarter of the following year. The FAA database is updated every year and consequently the data can be queried from any historical data up to the most recent year. The data is obtained as five different data frames as follows:</p>
 <ul>
 <li><p><code>flights</code>: it provides all the daily flight on-time performance data. It includes the origin airport, scheduled departure time, destination airport, scheduled arrival time, carrier, tail number of the aircraft, arrival delay, and departure delay. It has 863228 rows and 19 columns.</p></li>
 <li><p><code>weather</code>: it provides hourly weather parameters for origin airport. These parameters include visibility, wind speed, pressure, precipitation, and humidity. It has 976340 rows and 15 columns.</p></li>
@@ -237,15 +237,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p><code>airports</code>: it provides the metadata for the airport. The metadata includes the FAA code, its name, time zone, latitude, longitude, and altitude. It has 1251 rows and 8 columns.</p></li>
 <li><p><code>airlines</code>: it provides the metadata for the airlines which is the IATA code of the carrier and its name. It has 14 rows and 2 columns.</p></li>
 </ul>
-<p>All the data frames are related to each other. Hence, the data has a relation structure. Every row in each of the data frames can be identified by a primary key (PK) and the <code>flights</code> data frame can related to each of the other four data frames with the help of foreign keys (FK). Figure 1 shows the relational schema of the data. For example, every entry in the <code>flights</code> data frame can be uniquely identified by (<code>year</code>, <code>month</code>, <code>day</code>, <code>hour</code>, and <code>flight</code>) and it can be joined with the <code>weather</code> data frame based on (<code>origin</code>, <code>year</code>, <code>month</code>, <code>day</code>, and <code>hour</code>)</p>
+<p>All the data frames are related to each other. Hence, the data has a relational structure. Every row in each of the data frames can be identified by a primary key (PK) and the <code>flights</code> data frame can related to each of the other four data frames with the help of foreign keys (FK). Figure 1 shows the relational schema of the data. For example, every entry in the <code>flights</code> data frame can be uniquely identified by (<code>year</code>, <code>month</code>, <code>day</code>, <code>hour</code>, and <code>flight</code>) and it can be joined with the <code>weather</code> data frame based on (<code>origin</code>, <code>year</code>, <code>month</code>, <code>day</code>, and <code>hour</code>)</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="data-schema.png" class="img-fluid figure-img"></p>
 <figcaption>Fig. 1: The relational schema for the data obtained using the anyflights package in R where PK = Primary Key, FK = Foreign Key, … = more columns exist.</figcaption>
 </figure>
 </div>
-<p>The next section describes the data preparation process.</p>
 <p>The data used is not readily available online as CSV files. Hence, the data needs to be collected, filtered, consolidated, and saved for future use.</p>
+<p>The next section describes the data preparation process.</p>
 </section>
 <section id="data-collection" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="data-collection"><span class="header-section-number">2.2</span> Data collection</h2>
@@ -262,7 +262,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>The <code>anyflights</code> package has an <code>anyflights()</code> which queries the FAA database. It fetches all the five aforementioned data frames and therefore it can take a lot of time to obtain the data based on the network connectivity. In order to avoid changes of an API timeout, the default value of 60 seconds is updated with a high value of 1500 seconds stored in the <code>API_REQ_TIMEOUT</code>. All the previously stated constraints are stored in the <code>STATIONS</code> and <code>YEAR</code> constants. <code>save_data()</code> is a utility function to save the collected data into the required directory location.</p>
+<p>The <code>anyflights</code> package has a <code>anyflights()</code> function which queries the FAA database. It fetches all the five aforementioned data frames and therefore it can take a lot of time to obtain the data contingent upon the network connectivity. In order to avoid chances of an API timeout, the default value of 60 seconds is updated with a high value of 1500 seconds stored in the <code>API_REQ_TIMEOUT</code>. All the previously stated constraints are stored in the <code>STATIONS</code> and <code>YEAR</code> constants. <code>save_data()</code> is a utility function to save the collected data into the required directory location.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
