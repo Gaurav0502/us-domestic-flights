@@ -1,3 +1,6 @@
+---
+engine: knitr
+---
 
 ```{css}
 #| echo: false
