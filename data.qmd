@@ -323,7 +323,7 @@ ggplot(missing_summary, aes(x = Dataset, y = Proportion_Missing, fill = Dataset)
 
 Observation:
 
--   Weather_data has a high percentage of missing values (31.1%) while the rest of the data has barely any missing values.
+-   Weather_data has a high percentage of missing values (33.2%) while the rest of the data has barely any missing values.
 
 -   However, most of the missing values for weather_data are concentrated among 5 features.
 
