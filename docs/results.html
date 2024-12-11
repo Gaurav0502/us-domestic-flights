@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -145,7 +179,23 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#loading-the-datasets" id="toc-loading-the-datasets" class="nav-link active" data-scroll-target="#loading-the-datasets"><span class="header-section-number">3.1</span> Loading the datasets</a></li>
+  <li><a href="#loading-the-required-modules" id="toc-loading-the-required-modules" class="nav-link" data-scroll-target="#loading-the-required-modules"><span class="header-section-number">3.2</span> Loading the required modules</a></li>
+  <li><a href="#on-time-performance" id="toc-on-time-performance" class="nav-link" data-scroll-target="#on-time-performance"><span class="header-section-number">3.3</span> On-time performance</a>
+  <ul class="collapse">
+  <li><a href="#by-the-airport-rq1" id="toc-by-the-airport-rq1" class="nav-link" data-scroll-target="#by-the-airport-rq1"><span class="header-section-number">3.3.1</span> By the airport (RQ1)</a></li>
+  <li><a href="#by-the-airline-rq2" id="toc-by-the-airline-rq2" class="nav-link" data-scroll-target="#by-the-airline-rq2"><span class="header-section-number">3.3.2</span> By the airline (RQ2)</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/edit/main/results.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+
         
+
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -169,8 +219,280 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<div class="cell">
+<style type="text/css">
+p {
+  text-align: justify
+}
+</style>
+</div>
+<section id="loading-the-datasets" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="loading-the-datasets"><span class="header-section-number">3.1</span> Loading the datasets</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>flights <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/flights.csv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>airlines <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/airlines.csv"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>airports <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/airports.csv"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>weather <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/weather.csv"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>planes <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/raw/planes.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="loading-the-required-modules" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="loading-the-required-modules"><span class="header-section-number">3.2</span> Loading the required modules</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>NYC_AIRPORTS <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"LGA"</span>, <span class="st">"JFK"</span>, <span class="st">"EWR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="on-time-performance" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="on-time-performance"><span class="header-section-number">3.3</span> On-time performance</h2>
+<p>On-time performance is defined as the percentage of flights that departed or arrived on-time. As per the rules of Federal Aviation Administration (FAA), a flight is consider to be delayed only if it arrives or departed after 15 minutes of the scheduled time. In the plots below, the on-time performance is depicted separately for a perfect on-time or early arrival or departure using <strong>green</strong> color and the on-time performance within a buffer period of 15 minutes using <strong>yellow</strong> color.</p>
+<section id="by-the-airport-rq1" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="by-the-airport-rq1"><span class="header-section-number">3.3.1</span> By the airport (RQ1)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>inbound <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span>origin <span class="sc">%in%</span> NYC_AIRPORTS)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>outbound <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> <span class="fu">filter</span>(origin <span class="sc">%in%</span> NYC_AIRPORTS)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>inbound_otp <span class="ot">&lt;-</span> inbound <span class="sc">|&gt;</span> <span class="fu">drop_na</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dest) <span class="sc">|&gt;</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(<span class="at">total_flights =</span> <span class="fu">n</span>(),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">strictly_on_time =</span> <span class="fu">sum</span>(arr_delay <span class="sc">&lt;=</span> <span class="dv">0</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">strict_otp =</span> strictly_on_time<span class="sc">/</span>total_flights,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">on_time =</span> <span class="fu">sum</span>(arr_delay <span class="sc">&lt;=</span> <span class="dv">15</span>),</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">otp_increase =</span> on_time<span class="sc">/</span>total_flights <span class="sc">-</span> strict_otp,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">flight_type =</span> <span class="st">"inbound"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>outbound_otp <span class="ot">&lt;-</span> outbound <span class="sc">|&gt;</span> <span class="fu">drop_na</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin) <span class="sc">|&gt;</span> </span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(<span class="at">total_flights =</span> <span class="fu">n</span>(),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                <span class="at">strictly_on_time =</span> <span class="fu">sum</span>(dep_delay <span class="sc">&lt;=</span> <span class="dv">0</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">strict_otp =</span> strictly_on_time<span class="sc">/</span>total_flights,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">on_time =</span> <span class="fu">sum</span>(dep_delay <span class="sc">&lt;=</span> <span class="dv">15</span>),</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>                <span class="at">otp_increase =</span> on_time<span class="sc">/</span>total_flights <span class="sc">-</span> strict_otp,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                <span class="at">flight_type =</span> <span class="st">"outbound"</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>otp <span class="ot">&lt;-</span> <span class="fu">rbind</span>(inbound_otp <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">airport =</span> dest), </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>             outbound_otp <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">airport =</span> origin))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>otp <span class="sc">|&gt;</span> <span class="fu">select</span>(airport, otp_increase, strict_otp, flight_type) <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">!</span><span class="fu">c</span>(airport, flight_type), </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"otp_type"</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"otp"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> flight_type, <span class="at">y =</span> otp, <span class="at">fill =</span> otp_type)) <span class="sc">+</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span>airport) <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#ffc300"</span>, <span class="st">"#32de84"</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">name =</span> <span class="st">"delay criteria"</span>, </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"&lt;= 15 minutes"</span>, <span class="st">"&lt;= 0 minutes"</span>)) <span class="sc">+</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"On-time performance for the airports serving NYC (2023)"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Type of Flight"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"On-time performance (in %)"</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="results_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>The inbound and outbound flights at JFK and LGA had almost the same on-time performance.</p></li>
+<li><p>However, at EWR, the inbound flights had slightly better on-time performance than outbound flights.</p></li>
+</ul>
+</section>
+<section id="by-the-airline-rq2" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="by-the-airline-rq2"><span class="header-section-number">3.3.2</span> By the airline (RQ2)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>inbound <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span>origin <span class="sc">%in%</span> NYC_AIRPORTS)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>outbound <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> <span class="fu">filter</span>(origin <span class="sc">%in%</span> NYC_AIRPORTS)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>inbound_otp <span class="ot">&lt;-</span> inbound <span class="sc">|&gt;</span> <span class="fu">drop_na</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dest, carrier) <span class="sc">|&gt;</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(<span class="at">total_flights =</span> <span class="fu">n</span>(),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">strictly_on_time =</span> <span class="fu">sum</span>(arr_delay <span class="sc">&lt;=</span> <span class="dv">0</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">strict_otp =</span> strictly_on_time<span class="sc">/</span>total_flights,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">on_time =</span> <span class="fu">sum</span>(arr_delay <span class="sc">&lt;=</span> <span class="dv">15</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">otp_increase =</span> on_time<span class="sc">/</span>total_flights <span class="sc">-</span> strict_otp,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">flight_type =</span> <span class="st">"inbound"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'dest'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>outbound_otp <span class="ot">&lt;-</span> outbound <span class="sc">|&gt;</span> <span class="fu">drop_na</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, carrier) <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(<span class="at">total_flights =</span> <span class="fu">n</span>(),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">strictly_on_time =</span> <span class="fu">sum</span>(dep_delay <span class="sc">&lt;=</span> <span class="dv">0</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">strict_otp =</span> strictly_on_time<span class="sc">/</span>total_flights,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">on_time =</span> <span class="fu">sum</span>(dep_delay <span class="sc">&lt;=</span> <span class="dv">15</span>),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">otp_increase =</span> on_time<span class="sc">/</span>total_flights <span class="sc">-</span> strict_otp,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">flight_type =</span> <span class="st">"outbound"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'origin'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>otp <span class="ot">&lt;-</span> <span class="fu">rbind</span>(inbound_otp <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">airport =</span> dest), </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>             outbound_otp <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">airport =</span> origin))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>otp <span class="sc">|&gt;</span> <span class="fu">select</span>(carrier, airport, otp_increase, strict_otp, flight_type) <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">!</span><span class="fu">c</span>(carrier, airport, flight_type), </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"otp_type"</span>, <span class="at">values_to =</span> <span class="st">"otp"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> carrier, <span class="at">y =</span> otp, <span class="at">fill =</span> otp_type)) <span class="sc">+</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span> <span class="fu">facet_grid</span>(flight_type <span class="sc">~</span> airport,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                          <span class="at">scales=</span><span class="st">"free"</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                          <span class="at">space =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#ffc300"</span>, <span class="st">"#32de84"</span>),</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">name =</span> <span class="st">"delay criteria"</span>, </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"&lt;= 15 minutes"</span>, </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"&lt;= 0 minutes"</span>)) <span class="sc">+</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"On-time performance for the airlines serving NYC region (2023)"</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Airline Code"</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"On-time performance (in %)"</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="results_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>Allegiant Air (G4) had the best on-time performance at EWR (also among all the three airports). However, it had the least market share implying that it operated fewer domestic flights but had a very good on-time performance for them.</p></li>
+<li><p>United Airlines (UA) and Republic Airlines (YX) have a large market share at EWR and also have a commendable on-time performance for that operational scale.</p></li>
+<li><p>JetBlue (B6) has the highest market share at JFK but has a relatively weaker on-time performance especially for outbound flights.</p></li>
+<li><p>Hawaiian Airlines (HA) operates very few domestic flights to JFK but had a very weak on-time performance. Moreover, it turns out that many of their flights arrived within the 15 minute buffer period.</p></li>
+<li><p>Frontier Airlines (F9) had the worst on-time performance for outbound flights among all airlines.</p></li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>airlines <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"DL"</span>, <span class="st">"AA"</span>, <span class="st">"UA"</span>, <span class="st">"WN"</span>, <span class="st">"B6"</span>, <span class="st">"YX"</span>, <span class="st">"9E"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>inbound<span class="sc">$</span>carrier <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(inbound<span class="sc">$</span>carrier <span class="sc">%in%</span> airlines, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                    inbound<span class="sc">$</span>carrier, <span class="st">"Other"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>outbound<span class="sc">$</span>carrier <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(outbound<span class="sc">$</span>carrier <span class="sc">%in%</span> airlines, </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                                   outbound<span class="sc">$</span>carrier, <span class="st">"Other"</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>inbound_mkt <span class="ot">&lt;-</span> inbound <span class="sc">|&gt;</span> <span class="fu">select</span>(carrier, dest) <span class="sc">|&gt;</span> </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dest, carrier) <span class="sc">|&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>     <span class="fu">summarise</span>(<span class="at">num_flights =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'dest'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>outbound_mkt <span class="ot">&lt;-</span> outbound <span class="sc">|&gt;</span> <span class="fu">select</span>(carrier, origin) <span class="sc">|&gt;</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, carrier) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">summarise</span>(<span class="at">num_flights =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'origin'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>airport_mkt_share <span class="ot">&lt;-</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="fu">rename</span>(inbound_mkt, <span class="at">airport =</span> dest), </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">rename</span>(outbound_mkt, <span class="at">airport =</span> origin), </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"carrier"</span>, <span class="st">"airport"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">mutate</span>(<span class="at">total_flights =</span> num_flights.x <span class="sc">+</span> num_flights.y,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                             <span class="at">mkt_share =</span> total_flights<span class="sc">/</span><span class="fu">sum</span>(total_flights)<span class="sc">*</span><span class="fl">100.0</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                             <span class="at">mkt_share =</span> <span class="fu">round</span>(mkt_share))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fill_color <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"DL"</span> <span class="ot">=</span> <span class="st">"#EE7663"</span>, <span class="st">"AA"</span> <span class="ot">=</span> <span class="st">"#A0BEF5"</span>, <span class="st">"WN"</span> <span class="ot">=</span> <span class="st">"lightgreen"</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">"UA"</span> <span class="ot">=</span> <span class="st">"cornflowerblue"</span>, <span class="st">"B6"</span> <span class="ot">=</span> <span class="st">"gold"</span>, <span class="st">"Other"</span> <span class="ot">=</span> <span class="st">"#91AFB3"</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">"YX"</span> <span class="ot">=</span> <span class="st">"#85decb"</span>, <span class="st">"9E"</span> <span class="ot">=</span> <span class="st">"#d959c6"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>airport_mkt_share <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> airport, </span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">y =</span> mkt_share<span class="sc">/</span><span class="dv">100</span>, <span class="at">fill =</span> <span class="fu">fct_reorder</span>(carrier, </span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                                                                  mkt_share))) <span class="sc">+</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"stack"</span>, <span class="at">width =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> mkt_share), </span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                               <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> .<span class="dv">5</span>),</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                               <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> fill_color,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">name =</span> <span class="st">"carrier"</span>) <span class="sc">+</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Marketshare of Carrier by Airport (2023)"</span>, </span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>                          <span class="at">x =</span> <span class="st">"Airport"</span>, </span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>                          <span class="at">y =</span> <span class="st">"Market Share (in %)"</span>) <span class="sc">+</span> </span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="results_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>The domestic market share at LGA was dominated by Delta Airlines (DL) and American Airlines (AA). This is because Endeavor Airlines (9E) is a subsidiary of Delta Airlines and Republic Airlines (YX) operates under contract for Delta, American, and United.</p></li>
+<li><p>The domestic market share at JFK was dominated by JetBlue Airlines (B6) and Delta Airlines (DL).</p></li>
+<li><p>United Airlines (UA) dominated more than half of the domestic market share at EWR.</p></li>
+</ul>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -602,7 +924,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions"><ul><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/edit/main/results.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/edit/main/results.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Gaurav0502/us-domestic-flights.git/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
 <p>This book was built with <a href="https://quarto.org/">Quarto</a>.</p>
 </div>
