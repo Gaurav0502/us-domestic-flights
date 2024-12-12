@@ -33,12 +33,16 @@ library(tidyr)
 library(ggplot2)
 library(scales)
 library(forcats)
+library(ggrepel)
+library(ggalluvial)
+library(reshape2)
+library(vcd)
 
 NYC_AIRPORTS = c("LGA", "JFK", "EWR")
 
 ```
 
-## On-time performance
+## On-time performance Analysis
 
 On-time performance is defined as the percentage of flights that departed or arrived on-time. As per the rules of Federal Aviation Administration (FAA), a flight is consider to be delayed only if it arrives or departed after 15 minutes of the scheduled time. In the plots below, the on-time performance is depicted separately for a perfect on-time or early arrival or departure using **green** color and the on-time performance within a buffer period of 15 minutes using **yellow** color.
 
@@ -146,6 +150,7 @@ otp |> select(carrier, airport, otp_increase, strict_otp, flight_type) |>
   )
 
 ```
+-   The pattern in the on-time performance of inbound and outbound flights is similar in most cases.
 
 -   Allegiant Air (G4) had the best on-time performance at EWR (also among all the three airports). However, it had the least market share implying that it operated fewer domestic flights but had a very good on-time performance for them.
 
@@ -214,3 +219,410 @@ airport_mkt_share |> ggplot(aes(x = airport,
 -   The domestic market share at JFK was dominated by JetBlue Airlines (B6) and Delta Airlines (DL).
 
 -   United Airlines (UA) dominated more than half of the domestic market share at EWR.
+
+## Analysis of Delayed flights
+
+### Distribution of delayed flights (RQ3)
+
+The delay is generally categorized into seven categories: less than 10 minutes, 10-20 minutes, 20-40 minutes, 40-60 minutes, and more than 60 minutes. However, as a part of the on-time performance analysis, the delay <= 15 minutes considered to be on-time. Therefore, we use four categories: 15-30 minutes, 30-45 minutes, 45-60 minutes, and more than 60 minutes.
+
+```{r}
+
+categorize_delay <- function(x) {
+  if (x <= 15) {
+    return("<=15")
+  } else if (x > 15 & x <= 30) {
+    return("15-30")
+  } else if (x > 30 & x <= 45) {
+    return("30-45")
+  } else if (x > 45 & x <= 60) {
+    return("45-60")
+  } else {
+    return(">60")
+  }
+}
+
+inbound <- inbound |> drop_na() |> 
+  mutate(dep_delay_fct = sapply(dep_delay, categorize_delay),
+                                arr_delay_fct = sapply(arr_delay, 
+                                                       categorize_delay),
+                                flight_type = "inbound")
+
+outbound <- outbound |> drop_na() |>  
+  mutate(dep_delay_fct = sapply(dep_delay, categorize_delay),
+                                arr_delay_fct = sapply(arr_delay, 
+                                                       categorize_delay),
+                                flight_type = "outbound")
+
+nycflights <- rbind(inbound |> 
+                      select(dest, arr_delay_fct, flight_type) |> 
+                        rename(airport = dest, delay_fct = arr_delay_fct),
+                    outbound |> 
+                      select(origin, dep_delay_fct, flight_type) |> 
+                        rename(airport = origin, delay_fct = dep_delay_fct))
+
+nycflights$delay_fct <- factor(nycflights$delay_fct, 
+                               levels = c("<=15", "15-30", "30-45", 
+                                          "45-60", ">60"))
+```
+
+```{r}
+
+fill_color = c(">60" = "#d62828", "45-60" = "#e85d04", "30-45" = "#ffa200",
+               "15-30" = "gold")
+
+nycflights |> filter(delay_fct != "<=15") |> 
+  group_by(airport, flight_type, delay_fct) |> summarise(count = n()) |> 
+    mutate(percentage = round(count/sum(count)*100, 2)) |>
+      ggplot(aes(x = flight_type, y = percentage, fill = fct_rev(delay_fct))) + 
+      geom_col(position = "stack") + facet_wrap(~airport) +
+      scale_fill_manual(values = fill_color, name = "delay ranges") +
+      geom_text(aes(label = percentage),
+                position = position_stack(vjust = .5),
+                size = 3.5) +
+      labs(
+        title = "On-time performance for the airports serving NYC (2023)",
+        x = "Type of Flight",
+        y = "On-time performance (in %)"
+      )
+
+```
+### Cascading effects of departure delays (RQ4)
+
+```{r}
+
+nycflights <- rbind(inbound, outbound)
+
+nycflights$dep_delay_fct <- factor(nycflights$dep_delay_fct, 
+                               levels = c("<=15", "15-30", "30-45", 
+                                          "45-60", ">60"))
+
+nycflights$arr_delay_fct <- factor(nycflights$arr_delay_fct, 
+                               levels = c("<=15", "15-30", "30-45", 
+                                          "45-60", ">60"))
+
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+fill_color = c(">60" = "#d62828", "45-60" = "#e85d04", "30-45" = "#ffa200",
+               "15-30" = "gold", "<=15" = "green3")
+
+df <- nycflights |> filter(!dep_delay_fct == "<=15" & !arr_delay_fct == "<15") |>
+  group_by(dep_delay_fct, arr_delay_fct) |>
+   summarise(n = n())
+
+df |> drop_na() |> 
+  ggplot(aes(y = n/1000, axis1 = dep_delay_fct, axis2 = arr_delay_fct)) +
+  geom_alluvium(aes(fill = arr_delay_fct)) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Departure Delay", "Arrival Delay"),
+                   expand = c(.05, .05)) +
+  scale_y_continuous() +
+  scale_fill_manual(values = fill_color, name = "delay ranges") +
+      labs(
+        title = "Cascading effect of departure delay (2023)",
+        x = "Type of delay",
+        y = "Number of flights (in thousands)"
+      )
+  
+```
+
+
+### Factors affecting the delays (RQ5)
+
+#### Correlation (RQ5)
+
+```{r, fig.width=6}
+
+flights_planes <- inner_join(flights, 
+                             planes |> rename(tailnum = planes.tailnum), 
+                             by = c("tailnum"))
+
+flights_planes <- flights_planes |> 
+  rename(dep_hour = hour) |> 
+  mutate(arr_hour = sched_arr_time%/%100, 
+         plane_age = 2024 - planes.year)
+
+flights_planes_weather <- inner_join(flights_planes |> rename(hour = arr_hour),
+                                     weather |> rename(dest = origin), 
+                                     by = c("dest", "month", "day", "hour"))
+
+df <- flights_planes_weather |> select(arr_delay, dep_delay, hour, air_time,
+                                       wind_speed, visib, plane_age)
+
+corr_mat <- round(cor(df |> drop_na()), 2)
+
+melt(corr_mat) |> 
+  ggplot(aes(x = Var1, y = Var2, fill=value)) + 
+  geom_tile() + geom_text(aes(label = value), color = "white", size = 4) +
+  labs(
+    title = "Factors affecting the arrival delay (2023)",
+    x = "Factors affecting delays",
+    y = "Factors affecting delays"
+  )
+```
+
+## Air Traffic (RQ6)
+
+```{r}
+
+month2quarter <- function(month) {
+  if (month %in% c(1, 2, 3)) {
+    return("Q1")
+  } else if (month %in% c(4, 5, 6)) {
+    return("Q2")
+  } else if (month %in% c(7, 8, 9)) {
+    return("Q3")
+  } else {
+    return("Q4")
+  }
+}
+
+inbound_ <- inbound |> drop_na() |> 
+  rename(sched_dep_hour = hour) |> 
+    mutate(sched_arr_hour = sched_arr_time%/%100,
+           arr_hour = arr_time%/%100,
+           dep_hour = dep_time%/%100,
+           qtr = sapply(month, month2quarter))
+outbound_ <- outbound |> drop_na() |> 
+  rename(sched_dep_hour = hour) |> 
+    mutate(sched_arr_hour = sched_arr_time%/%100,
+           arr_hour = arr_time%/%100,
+           dep_hour = dep_time%/%100,
+           qtr = sapply(month, month2quarter))
+
+air_traffic_ <- rbind(inbound_ |> select(dest, arr_hour, sched_arr_hour, qtr) |> 
+                        rename(airport = dest,
+                               hour = arr_hour,
+                               sched_hour = sched_arr_hour),
+                      outbound_ |> select(origin, dep_hour, 
+                                          sched_dep_hour, qtr) |> 
+                        rename(airport = origin,
+                               hour = dep_hour,
+                               sched_hour = sched_dep_hour))
+
+sched_air_traffic <- air_traffic_ |> 
+  group_by(airport, sched_hour, qtr) |>
+    summarise(scheduled = n())
+
+air_traffic <- air_traffic_ |> 
+  group_by(airport, hour, qtr) |> 
+    summarise(actual = n())
+
+air_traffic$hour <- factor(air_traffic$hour, 
+                           levels = c(0:24))
+sched_air_traffic$sched_hour <- factor(sched_air_traffic$sched_hour, 
+                                       levels = c(0:24))
+
+air_traffic <- 
+  left_join(air_traffic, sched_air_traffic |> 
+              rename(hour = sched_hour),
+            by = c("airport", "hour", "qtr"))
+
+air_traffic[is.na(air_traffic)] <- 0
+
+```
+```{r, fig.width=8}
+
+air_traffic |> pivot_longer(!c("airport", "hour", "qtr"), 
+                            values_to = "numflights", names_to = "type") |> 
+  ggplot(aes(x = hour, y = numflights, color = type, group = type)) +
+   geom_line() + facet_grid(qtr~airport, scales="free_x", space = "free_x") + 
+   scale_x_discrete(breaks = c(0, 4, 8, 12, 16, 20, 24)) +
+   scale_color_manual(values = c("scheduled" = "tomato", "actual" = "darkblue"), 
+                      name = "Type of air traffic") +
+   labs(
+      title = "Scheduled Air Traffic v/s Actual Air Traffic (2023)", 
+      subtitle = "over the four quarters",
+      x = "Hour of the day",
+      y = "Number of flights") +
+   theme_gray(16) +
+   theme(legend.position="bottom",
+         strip.text.y = element_text(angle = 0))
+
+```
+
+
+## Monthly trends in delays (RQ7)
+
+```{r}
+inbound <- inbound |> drop_na() |> 
+  mutate(dep_delay_fct = sapply(dep_delay, categorize_delay),
+                                arr_delay_fct = sapply(arr_delay, 
+                                                       categorize_delay),
+                                flight_type = "inbound")
+
+outbound <- outbound |> drop_na() |>  
+  mutate(dep_delay_fct = sapply(dep_delay, categorize_delay),
+                                arr_delay_fct = sapply(arr_delay, 
+                                                       categorize_delay),
+                                flight_type = "outbound")
+
+nycflights <- rbind(inbound |> 
+                      select(dest, arr_delay_fct, flight_type, month) |> 
+                        rename(airport = dest, delay_fct = arr_delay_fct),
+                    outbound |> 
+                      select(origin, dep_delay_fct, flight_type, month) |> 
+                        rename(airport = origin, delay_fct = dep_delay_fct))
+
+nycflights$delay_fct <- factor(nycflights$delay_fct, 
+                               levels = c("<=15", "15-30", "30-45", 
+                                          "45-60", ">60"))
+```
+
+```{r}
+
+colors = c(">60" = "#d62828", "45-60" = "#e85d04", 
+           "30-45" = "#ffa200", "15-30" = "gold")
+
+nycflights |> filter(delay_fct != "<=15") |> 
+  group_by(month, delay_fct, airport) |> 
+  summarise(count = n()) |> mutate(percentage = count/sum(count)) |>
+    ggplot(aes(x = factor(month), y = percentage, 
+               color = delay_fct, group = delay_fct)) + 
+    geom_line() +
+    facet_wrap(.~airport, scale = "free_x", ncol = 1) + 
+    scale_y_continuous(labels = scales::percent) +
+    scale_color_manual(values = colors, name = "delay ranges") +
+    scale_x_discrete(labels = month.abb) +
+    labs(
+      title = "Percentage of delayed flights over the 12 months (2023)",
+      x = "Month",
+      y = "Percentage of delayed flights") +
+    theme(legend.position="bottom")
+  
+
+```
+## Geospatial Analysis (RQ8)
+
+```{r, fig.width=11}
+
+colors = c(">60" = "#d62828", "45-60" = "#e85d04", "30-45" = "#ffa200",
+               "15-30" = "gold", "<=15" = "green3")
+
+states = map_data("state")
+airports_usa <- airports |> 
+  filter(airports.lon < 0 & airports.lat < 50 & airports.lon > -140)
+
+inbound_avg_delay <- 
+  inner_join(inbound, 
+             airports_usa |> rename(origin = airports.faa), 
+             by = c("origin")) |> 
+  group_by(origin, airports.lat, airports.lon) |> 
+  summarise(avg_arr_delay = sapply(mean(arr_delay), categorize_delay))
+
+outbound_avg_delay <- 
+  inner_join(outbound, 
+             airports_usa |> rename(dest = airports.faa), 
+             by = c("dest")) |> 
+  group_by(dest, airports.lat, airports.lon) |> 
+  summarise(avg_dep_delay = sapply(mean(dep_delay), categorize_delay))
+
+inbound_avg_delay$avg_arr_delay <- 
+  factor(inbound_avg_delay$avg_arr_delay, 
+         levels = c("<=15", "15-30", "30-45", "45-60", ">60"))
+
+inbound_avg_delay$avg_dep_delay <- 
+  factor(outbound_avg_delay$avg_dep_delay, 
+         levels = c("<=15", "15-30", "30-45", "45-60", ">60"))
+
+inbound_avg_delay <- inbound_avg_delay |> 
+  rename(inbound = avg_arr_delay,
+         outbound = avg_dep_delay)
+
+inbound_avg_delay <- inbound_avg_delay |> 
+  pivot_longer(!c("origin", "airports.lat", "airports.lon"),
+               values_to = "delay",
+               names_to = "flight_type")
+
+```
+```{r}
+
+ggplot(data = states) +
+     geom_polygon(mapping=aes(x = long,y = lat,group = group),
+                              color = "black",fill = "white") +
+     geom_point(data = inbound_avg_delay,
+                mapping = aes(x = airports.lon, y = airports.lat, 
+                              color = delay)) +
+     geom_text_repel(data = inbound_avg_delay |> 
+                              filter(delay %in% c("45-60", ">60")), 
+                     mapping = aes(x = airports.lon, y = airports.lat, 
+                                   label = origin), color = "tomato", 
+                                   nudge_y = -0.6) +
+     geom_text_repel(data = inbound_avg_delay |> 
+                              filter(delay %in% c("15-30", "30-45")), 
+                     mapping = aes(x = airports.lon, y = airports.lat, 
+                                 label = origin), color = "black", 
+                                 nudge_y = -0.6) +
+     facet_wrap(~flight_type, ncol = 2) +
+     scale_color_manual(values = colors, name = "delay ranges") +
+     theme(legend.position = "bottom") +
+     labs(
+          title = "Inbound (arr_delay) and Outbound (dep_delay) flight delay by airports (2023)",
+          x = "Longitude",
+          y = "Latitude")
+
+```
+
+## Delays for busiest routes (RQ9)
+
+```{r}
+popular_airlines = c("AA", "DL", "UA", "B6")
+
+colors = c(">60" = "#d62828", "45-60" = "#e85d04", "30-45" = "#ffa200",
+               "15-30" = "gold", "<=15" = "green3")
+
+busiest_routes <- inbound |> 
+  select(origin, dest, dep_delay, arr_delay) |> drop_na() |> 
+    group_by(origin, dest) |> 
+      summarise(numflights = n()) |> 
+          arrange(-numflights) |> head(10) |> select(origin, dest)
+
+inbound_alluvial <- inbound |> drop_na() |> 
+  filter(origin %in% busiest_routes$origin & carrier %in% popular_airlines) |> 
+    mutate(delay_fct = sapply(arr_delay, categorize_delay),
+           flight_type = "Inbound") |> 
+      group_by(origin, dest, carrier, delay_fct, flight_type) |> 
+        summarise(n = n())
+
+outbound_alluvial <- outbound |> drop_na() |> 
+  filter(dest %in% busiest_routes$origin & carrier %in% popular_airlines) |> 
+    mutate(delay_fct = sapply(dep_delay, categorize_delay),
+           flight_type = "Outbound") |> 
+      group_by(origin, dest, carrier, delay_fct, flight_type) |> 
+        summarise(n = n())
+
+alluvial <- rbind(inbound_alluvial, outbound_alluvial)
+
+alluvial$delay_fct <- 
+  factor(alluvial$delay_fct, 
+         levels = c("<=15", "15-30", "30-45", "45-60", ">60"))
+
+```
+```{r}
+#| warning: false
+#| message: false
+
+alluvial |> drop_na() |> 
+  ggplot(aes(y = n/1000, axis1 = factor(origin), 
+             axis2 = factor(carrier), axis3 = factor(dest))) +
+  geom_alluvium(aes(fill = delay_fct), width = 1/12) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  facet_wrap(~flight_type) +
+  scale_x_discrete(limits = c("Origin", "Carrier", "Destination"),
+                   expand = c(.05, .05))+
+  scale_fill_manual(values = colors, name = "delay ranges") +
+  labs(
+      title = "On-time performance for the top 10 busiest routes from NYC (2023)",
+      subtitle = "with popular airlines",
+      y = "Number of flights (in thousands)") +
+  theme(panel.spacing = unit(1, "lines"))
+
+```
+
+
