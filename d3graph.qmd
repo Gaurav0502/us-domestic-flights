@@ -1,13 +1,37 @@
 # Interactive graph
 
+```{=html}
 <style>
-  * {
+* {
     font-family: sans-serif;
   }
-</style> 
+</style>
+```
 
-<div id="plot">
+```{=html}
+<div id="group">
+<div id="plot"></div>
+<div style="padding-left: 100px", id="estimate-dropdown">
+<label for="estimate"> Your estimation: </label>
+<select id="estimate" name="time-category">
+    <option value="NA" selected>Give your estimate of the delay</option> 
+    <option value="<=15">less than equal to 15</option>
+    <option value="15-30">15-30</option>
+    <option value="30-45">30-45</option>
+    <option value="45-60">45-60</option>
+    <option value=">60">more than 60</option>
+</select>
+<p></p>
+<span id="result"></span>
+</div>
+<div style="padding-left: 250px;" id="reload">
+<input style="background: black; color: white;" type="button" id="tryAnotherBtn" value="Try another one!" />
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+```
+
+```{=html}
 <script src="scripts/myscript.js"></script>
+```
