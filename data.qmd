@@ -272,15 +272,13 @@ weather_data |> plot_missing(title = "Missing Values in Weather Data")
 
 ```
 
-Observation:
-
 -   The airlines_data stores the airline code and name. Hence, it does not have any null values
 
 -   The airports_data has 9.51% missing values in airports.tzone column. However, it can be derived from the airports.tz column
 
--   Flights_data has null values for actual time of departure and arrival. However, there are no null values in the scheduled time of departure and arrival. This implies that it highly probable that the flights with these null values were cancelled or rescheduled. Hence, there are null values for tail number, arrival delay, and departure delay.
+-   Flights_data has null values for actual time of departure and arrival. However, there are no null values in the scheduled time of departure and arrival.
 
--  In the planes_data, the year column has null values which do not have any significance behind them.
+-   In the planes_data, the year column has null values which do not have any significance behind them.
 
 -   The weather_data however has several missing values. In fact, more than 95% of the values are missing in 5 of the columns - precip, temp, deep, humid, pressure. Thus, these features may be dropped.
 
@@ -321,10 +319,29 @@ ggplot(missing_summary, aes(x = Dataset, y = Proportion_Missing, fill = Dataset)
 
 ```
 
-Observation:
-
 -   Weather_data has a high percentage of missing values (33.2%) while the rest of the data has barely any missing values.
 
 -   However, most of the missing values for weather_data are concentrated among 5 features.
 
 -   Hence, after we remove these 5, the proportion of missing values for weather will come down drastically.
+
+## Missing values in flights data
+
+```{r, eval=TRUE}
+library(redav)
+
+mv_cols <- c("dep_delay", "arr_delay", "arr_time", "dep_time", 
+             "air_time", "tailnum")
+
+plot_missing(flights_data[mv_cols], percent = TRUE)
+
+```
+There three noticeable patterns in missing values in the flights data frame:
+
+- The first case is of a cancellation before aircraft allocation when all the six columns are missing.
+
+- The second case is of a cancellation after aircraft allocation when all the columns except `tailnum` are missing.
+
+- The third case is of a diversion when the `arr_delay`, `arr_time`, and `air_time` are missing. This implies that the aircraft was scheduled to arrive but did not arrive.
+
+However, in the fourth case, it is possible (but not certain) that the plane took off and faced a technical issue and landed back to the origin or one of NYC airports.

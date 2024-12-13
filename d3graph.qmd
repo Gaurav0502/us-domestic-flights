@@ -35,3 +35,19 @@
 ```{=html}
 <script src="scripts/myscript.js"></script>
 ```
+
+After going through the analysis, the reader would have got some idea about the patterns in delays and the factors affecting them. This interactive plot aims to quiz the user on their understanding by estimating the range of the arrival delay of a flight given four parameters:
+
+1.  `origin`: the FAA code for the origin airport.
+
+2.  `dest`: the FAA code for the destination airport.
+
+3.  `dep_delay`: the range in which the departure delay belongs to.
+
+4.  `visib`: the visibility at the hour of arrival where 0 is worst visibility and 10 is best visibility.
+
+5.  `carrier`: the carrier operating the flight.
+
+There are many other factors associated with estimating the arrival delay and it is complicated for a human to process all those factors and provide their estimate. Hence, the five simple factors (yet important) are provided to the reader and they can [select]{.underline}the range of the `arr_delay` from the drop down. The actual `arr_delay` is only made visible when the reader provides their estimate. If the user wishes to estimate the outcome of another flight, then can use the `tryAnotherBtn` to load a [fresh random instance]{.underline}.
+
+We chose to make the plot since most of hourly or yearly or monthly patterns can be shown in the form of faceted time series plots and hence quizzing the reader was one of best ways to make the reader interact with aviation data.
