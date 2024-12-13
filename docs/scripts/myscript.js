@@ -10,9 +10,7 @@ d3.csv(url).then(function(data) {
   var val = [row.arr_delay]
   
   var param_names = Object.keys(row).filter(function(key){ return key !== "arr_delay" && key !== "";});
-  console.log(param_names)
   var params = param_names.map(key => row[key]);
-  console.log(params)
   const y = 55;
   
   var svg = d3.select("div#plot")
@@ -99,7 +97,6 @@ d3.csv(url).then(function(data) {
       
     const dropdown = document.getElementById("estimate");
     
-    // Update the rectangles based on the slider value
     dropdown.addEventListener("input", function() {
        if(dropdown.value){
            svg.selectAll(".delay").attr("visibility", "visible")
