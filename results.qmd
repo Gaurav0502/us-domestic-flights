@@ -150,6 +150,7 @@ otp |> select(carrier, airport, otp_increase, strict_otp, flight_type) |>
   )
 
 ```
+
 -   The pattern in the on-time performance of inbound and outbound flights is similar in most cases.
 
 -   Allegiant Air (G4) had the best on-time performance at EWR (also among all the three airports). However, it had the least market share implying that it operated fewer domestic flights but had a very good on-time performance for them.
@@ -224,7 +225,7 @@ airport_mkt_share |> ggplot(aes(x = airport,
 
 ### Distribution of delayed flights (RQ3)
 
-The delay is generally categorized into seven categories: less than 10 minutes, 10-20 minutes, 20-40 minutes, 40-60 minutes, and more than 60 minutes. However, as a part of the on-time performance analysis, the delay <= 15 minutes considered to be on-time. Therefore, we use four categories: 15-30 minutes, 30-45 minutes, 45-60 minutes, and more than 60 minutes.
+The delay is generally categorized into seven categories: less than 10 minutes, 10-20 minutes, 20-40 minutes, 40-60 minutes, and more than 60 minutes. However, as a part of the on-time performance analysis, the delay \<= 15 minutes considered to be on-time. Therefore, we use four categories: 15-30 minutes, 30-45 minutes, 45-60 minutes, and more than 60 minutes.
 
 ```{r}
 
@@ -287,6 +288,13 @@ nycflights |> filter(delay_fct != "<=15") |>
       )
 
 ```
+
+-   Across all airports (EWR, JFK, LGA), around 40% of flights experience delays exceeding 60 minutes, indicating significant on-time performance challenges.
+
+-   EWR has slightly better performance in shorter delay categories (15–30 minutes), while JFK has the highest proportion of long delays (\>60 minutes).
+
+-   Delay patterns are nearly identical for inbound and outbound flights, suggesting systemic issues rather than route-specific challenges.
+
 ### Cascading effects of departure delays (RQ4)
 
 ```{r}
@@ -331,6 +339,11 @@ df |> drop_na() |>
   
 ```
 
+-   A significant number of flights with 15–30 departure delays arrive with \<= 15 minutes arrival delays, thus showing effective delay recovery mechanisms for short delays, likely due to buffer times in schedules or improved flight management during transit.
+
+-   For flights in the 30–60 minutes departure delay range, most flights either maintain or reduce the subsequent delay in arrival, once again showing an effective delay recovery mechanism.
+
+-   Flights with departure delays exceeding 60 minutes overwhelmingly result in arrival delays within the same category (\>60). This emphasizes the difficulty in recovering schedules once delays surpass the 1-hour mark.
 
 ### Factors affecting the delays (RQ5)
 
@@ -365,6 +378,14 @@ melt(corr_mat) |>
     y = "Factors affecting delays"
   )
 ```
+
+-   The most actionable metric for predicting or managing arrival delays is departure delay, as their correlation is very high.
+
+-   There is a small positive correlation between hour (time of day) and arrival delay. Certain times of the day might see slightly more delays. However, this can be impacted by the fact that the overall frequency of flights differs during different times of the day.
+
+-   Wind speed and arrival delay show a weak positive correlation (0.07), possibly indicating that stronger winds marginally impact delays.
+
+-   Variables like plane age, visibility, and air time have nearly no meaningful correlation with arrival delay.
 
 ## Air Traffic (RQ6)
 
@@ -426,6 +447,7 @@ air_traffic <-
 air_traffic[is.na(air_traffic)] <- 0
 
 ```
+
 ```{r, fig.width=8}
 
 air_traffic |> pivot_longer(!c("airport", "hour", "qtr"), 
@@ -446,6 +468,9 @@ air_traffic |> pivot_longer(!c("airport", "hour", "qtr"),
 
 ```
 
+-   The frequency of flights is highest between hours 6 to 20 and is low at other times. For all 3 airports, the scheduled and actual number of flights are pretty close to each other, with major overlap, indicating efficient on-time performance consistently. 
+
+-   Over the 4 quarters, we observe similar patterns in flight frequency for a particular airport. This tells us that each airport maintains its same schedule throughout the 4 quarters. Of course, the schedule is different for different airports.
 
 ## Monthly trends in delays (RQ7)
 
@@ -494,9 +519,12 @@ nycflights |> filter(delay_fct != "<=15") |>
       x = "Month",
       y = "Percentage of delayed flights") +
     theme(legend.position="bottom")
-  
-
 ```
+
+-   EWR observes a peak in delays during the Spring season followed by a dip in the Summer and Fall seasons. JFK observes a gradual increase in delays throughout the year resulting in a peak in the Fall season. LGA, on the other hand, observes a peak in delays during the Winter months, followed by a big dip in the Spring season, and then average delays in the remaining months.
+
+-   Thus, each airport observes a different pattern throughout the year, there isn’t much similarity between them.
+
 ## Geospatial Analysis (RQ8)
 
 ```{r, fig.width=11}
@@ -540,6 +568,7 @@ inbound_avg_delay <- inbound_avg_delay |>
                names_to = "flight_type")
 
 ```
+
 ```{r}
 
 ggplot(data = states) +
@@ -567,6 +596,10 @@ ggplot(data = states) +
           y = "Latitude")
 
 ```
+
+-   We observe that on the East Coast, most airports have a \<=15 minute delay range whereas on the West Coast, there are many airports that belong to higher delay ranges.
+
+-   There are more airports in the 15-30 minute delay range in outbound as compared to inbound. However, in the high delay ranges (of greater than 30 minutes), inbound is more than outbound. Overall, there is a decent similarity between the two, with a few differences.
 
 ## Delays for busiest routes (RQ9)
 
@@ -603,6 +636,7 @@ alluvial$delay_fct <-
          levels = c("<=15", "15-30", "30-45", "45-60", ">60"))
 
 ```
+
 ```{r}
 #| warning: false
 #| message: false
@@ -625,4 +659,12 @@ alluvial |> drop_na() |>
 
 ```
 
+-   The majority of flights (links) fall in the green zone (≤15 minutes delay), indicating good on-time performance for most routes. Delays above 30 minutes (orange and red links) are relatively rare but are visible, especially for specific carriers and routes.
 
+-   Atlanta (ATL) is a major destination and origin for NYC flights, with a significant number of flights represented by thicker flows in the diagram. Other popular routes include Boston (BOS), Chicago (ORD), and Los Angeles (LAX).
+
+-   AA (American Airlines), B6 (JetBlue), DL (Delta Airlines), and UA (United Airlines) dominate the busiest routes. The thickness of the flows suggests that Delta (DL) and JetBlue (B6) handle a substantial number of flights compared to other carriers.
+
+-   EWR (Newark), JFK (John F. Kennedy), and LGA (LaGuardia) each show distinct patterns in terms of the routes they handle. JFK appears to handle a larger proportion of long-haul flights (e.g., LAX), while LGA has more regional routes (e.g., BOS, MCO).
+
+-   Both panels (Inbound and Outbound) have similar patterns, suggesting balanced traffic for NYC’s busiest routes. Routes involving LAX and SFO show slightly more yellow, orange, and red links, indicating that these long-distance routes may experience higher delays. Shorter routes like LGA to BOS or MIA show predominantly green links, suggesting better punctuality for shorter flights.
