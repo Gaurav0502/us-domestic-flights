@@ -175,14 +175,18 @@ p {
 }
 </style>
 </div>
-<p>The data used for the analysis caters particularly to the on-time performance of inbound and outbound domestic flights from the NYC airports (LGA, JFK, EWR). From the exploration, there were four main takeaways as follows:</p>
+<p>The data used for the analysis caters particularly to the on-time performance of <code>inbound</code> and <code>outbound</code> domestic flights from the NYC airports (LGA, JFK, EWR). From the exploration, there were six main takeaways as follows:</p>
 <ol type="1">
-<li><p>Most of domestic flights either arrive early or on-time. The flights that get delayed are mostly those which departed late from origin airport. There are many real-time factors that contribute to delay (many of which are beyond the scope of this data set.)</p></li>
-<li><p>There is relatively smoother air traffic at LGA since it only caters to domestic flights. While, EWR and JFK, also have significant amount of international air traffic which is not available in this data.</p></li>
-<li><p>The delays pertaining to the categories: 15-30 and 30-45 are overcomed by the airline.</p></li>
-<li><p>JetBlue has higher variability in the delays compared to the other airlines.</p></li>
+<li><p>Most domestic flights either arrive early or on-time. The flights that get delayed are mostly those which departed late from the <code>origin</code> airport. There are many real-time factors that contribute to the delay (many of which are beyond the scope of this data set).</p></li>
+<li><p>Weather factors such as <code>visibility</code> and <code>wind_speed</code> do contribute to the arrival delay. However, the occurrence of such instances is uncommon and the duration is mostly short-lived resulting in a lower magnitude of correlation.</p></li>
+<li><p>There is relatively smoother domestic air traffic at LGA since it only caters to domestic flights (except for flights from Canada). On the other hand, JFK and EWR handle a larger proportion of long-haul domestic flights. This is mainly because JFK and EWR are large international airports and operating many of the long-haul flights helps <code>carriers</code> in wide-body aircraft rotation for international routes.</p></li>
+<li><p>It is observed that the <code>inbound</code> and <code>outbound</code> flights to and from airports in the West coast have a higher average delay compared to that of the airports in the East Coast.</p></li>
+<li><p>Carriers more commonly overcome departure delays in the 15-30min and 30-45min range compared to that of &gt;60min delay range probably because they keep small buffers in airline schedules to accommodate small delays.</p></li>
+<li><p>Majority of the air traffic from the NYC airports is concentrated between 6am and 8pm. Moreover, it is observed that the scheduled air-traffic for each of the three airports is almost identical for the four quarters.</p></li>
 </ol>
-<p>The study limits can further exhaustively understand the patterns in the delays by considering other sources of data that would cover passenger details, their connections, and airport operations.</p>
+<p>This study limits on the on-time performance and meteorological data for analyzing the factors affecting and patterns in flight delays. However, there are many other reasons for flight delays which include equipment maintenance, airport operations, passenger demographics, and passenger connections. However, some of data like the passenger demographics and passenger connections cannot be open-sourced due to privacy issues while the remaining data may be propriety for the carriers and governments.</p>
+<p>This project helped us understand that working with real-world aviation data is complicated because it has multiple components associated with it such as geo-spatial, time-series patterns, correlation patterns, etc. More importantly, the domestic flights data for only three airports was very huge and extracting patterns from it is tedious. Overall, this project helped us learn data manipulation (<code>dplyr</code>) and visualization (<code>ggplot2</code> and <code>ggalluvial</code>) in R.</p>
+<p>We appreciate the open-source project, <code>anyflights()</code>, to provide real-world aviation data in a clean and structured format!</p>
 
 
 
