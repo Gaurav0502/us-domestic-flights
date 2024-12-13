@@ -1,1 +1,27 @@
+---
+execute:
+  eval: true
+
+engine: knitr
+---
+
+```{css}
+#| echo: false
+p {
+  text-align: justify
+}
+```
+
 # Conclusion
+
+The data used for the analysis caters particularly to the on-time performance of inbound and outbound domestic flights from the NYC airports (LGA, JFK, EWR). From the exploration, there were four main takeaways as follows:
+
+1.  Most of domestic flights either arrive early or on-time. The flights that get delayed are mostly those which departed late from origin airport. There are many real-time factors that contribute to delay (many of which are beyond the scope of this data set.)
+
+2.  There is relatively smoother air traffic at LGA since it only caters to domestic flights. While, EWR and JFK, also have significant amount of international air traffic which is not available in this data.
+
+3.  The delays pertaining to the categories: 15-30 and 30-45 are overcomed by the airline.
+
+4.  JetBlue has higher variability in the delays compared to the other airlines.
+
+The study limits can further exhaustively understand the patterns in the delays by considering other sources of data that would cover passenger details, their connections, and airport operations.

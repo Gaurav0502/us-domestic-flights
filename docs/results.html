@@ -705,7 +705,8 @@ using the `.groups` argument.</code></pre>
 <li><p>The most actionable metric for predicting or managing arrival delays is departure delay, as their correlation is very high.</p></li>
 <li><p>There is a small positive correlation between hour (time of day) and arrival delay. Certain times of the day might see slightly more delays. However, this can be impacted by the fact that the overall frequency of flights differs during different times of the day.</p></li>
 <li><p>Wind speed and arrival delay show a weak positive correlation (0.07), possibly indicating that stronger winds marginally impact delays.</p></li>
-<li><p>Variables like plane age, visibility, and air time have nearly no meaningful correlation with arrival delay.</p></li>
+<li><p>Visibility has a slight negative correlation which implies that lower the visibility, higher the delay.</p></li>
+<li><p>Variables like plane age and air time have nearly no meaningful correlation with arrival delay.</p></li>
 </ul>
 </section>
 </section>
@@ -811,7 +812,7 @@ the `.groups` argument.</code></pre>
 </div>
 </div>
 <ul>
-<li><p>The frequency of flights is highest between hours 6 to 20 and is low at other times. For all 3 airports, the scheduled and actual number of flights are pretty close to each other, with major overlap, indicating efficient on-time performance consistently.&nbsp;</p></li>
+<li><p>The frequency of flights is highest between hours 6 to 20 and is low at other times. For all 3 airports, the scheduled and actual number of flights are pretty close to each other, with major overlap, indicating efficient on-time performance consistently.</p></li>
 <li><p>Over the 4 quarters, we observe similar patterns in flight frequency for a particular airport. This tells us that each airport maintains its same schedule throughout the 4 quarters. Of course, the schedule is different for different airports.</p></li>
 </ul>
 </section>
