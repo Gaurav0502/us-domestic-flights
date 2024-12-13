@@ -17,6 +17,8 @@ The directory structure for the `data` sub-directory must be as follows:
 ├── clean
 ├── consolidate.R
 ├── derived
+├── interactive
+│   └── delayfactors.csv
 ├── raw
 │   ├── airlines.csv
 │   ├── airports.csv
